@@ -25,7 +25,7 @@ const wrapperStyle = {
   display: "block",
   minHeight: "1px",
   width: "100%",
-  border: "1px solid #ddd",
+  border: "2px solid #ddd",
   overflow: "auto",
 };
 

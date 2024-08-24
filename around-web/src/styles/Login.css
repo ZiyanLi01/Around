@@ -1,13 +1,11 @@
 
 .login-form {
-    max-width: 300px;
-    width: 45%;
-    margin: 0 auto;
-  }
-  
-  .login-form-button {
-    max-width: 300px;
-    width: 45%;
-  }
+  width: 300px;
+  margin: 0 auto;
+}
+
+.login-form-button {
+  width: 300px;
+}
   
   
