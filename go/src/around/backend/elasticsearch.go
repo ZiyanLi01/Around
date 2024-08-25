@@ -9,7 +9,8 @@ var (
 ESBackend *ElasticsearchBackend
 )
 
-type ElasticsearchBackend struct { client *elastic.Client
+type ElasticsearchBackend struct { 
+	client *elastic.Client
 }
 
 func InitElasticsearchBackend() {
@@ -38,7 +39,7 @@ func InitElasticsearchBackend() {
 			}
 	}`
     _, err :=
-client.CreateIndex(constants.POST_INDEX).Body(mapping).Do(context.Background())
+	client.CreateIndex(constants.POST_INDEX).Body(mapping).Do(context.Background())
         if err != nil {
             panic(err)
 		} 	
@@ -70,4 +71,16 @@ client.CreateIndex(constants.POST_INDEX).Body(mapping).Do(context.Background())
     fmt.Println("Indexes are created.")
     
 	ESBackend = &ElasticsearchBackend{client: client}
+}
+
+func (backend *ElasticsearchBackend) ReadFromES(query elastic.Query, index string)(*elastic.SearchResult, error) {
+	searchResult, err := backend.client.Search().
+		Index(index).
+		Query(query).
+		Pretty(true).
+		Do(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	return searchResult, nil
 }
