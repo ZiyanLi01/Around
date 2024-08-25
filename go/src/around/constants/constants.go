@@ -6,4 +6,5 @@ const (
 	ES_URL = "http://10.128.0.3:9200"
 	ES_USERNAME = "liz"
 	ES_PASSWORD = "920210"
+	GCS_BUCKET = "around-liz"
 )
