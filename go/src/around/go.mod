@@ -1,6 +1,6 @@
 module around
 
-go 1.22.6
+go 1.21
 
 require (
 	cloud.google.com/go v0.115.0 // indirect
