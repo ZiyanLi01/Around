@@ -1,0 +1,8 @@
+elasticsearch:
+address: "http://34.41.51.185:9200"
+username: "liz"
+password: "920210"
+gcs:
+bucket: "around-liz"
+token:
+secret: "secret"
