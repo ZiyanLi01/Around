@@ -6,7 +6,13 @@ import (
     "around/service"
     "around/model"
     "github.com/gorilla/mux"
+    "log"
+    "github.com/google/uuid"
 )
+
+func generateUniqueId() string {
+    return uuid.New().String()
+}
 
 // GenerateImageHandler handles the request to generate an AI image
 func GenerateImageHandler(w http.ResponseWriter, r *http.Request) {
@@ -15,27 +21,39 @@ func GenerateImageHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+        log.Printf("Failed to parse request body: %v", err)
         http.Error(w, "Failed to parse request body", http.StatusBadRequest)
         return
     }
 
-    userId := r.Context().Value("userID").(string)
+    userID, ok := r.Context().Value(userIDKey).(string)
+    if !ok || userID == "" {
+        log.Println("UserID not found in context")
+        http.Error(w, "UserID not found", http.StatusUnauthorized)
+        return
+    }
 
-    imageUrl, err := service.GenerateAIImage(req.Description, userId)
+    imageUrl, err := service.GenerateAIImage(req.Description, userID)
     if err != nil {
+        log.Printf("Failed to generate image: %v", err)
         http.Error(w, "Failed to generate image", http.StatusInternalServerError)
         return
     }
 
     image := model.Image{
-        Id:          imageUrl, // You can generate an ID if needed
+        Id:          generateUniqueId(),
         Url:         imageUrl,
         Description: req.Description,
-        UserId:      userId,
+        UserId:      userID,  // Consistent naming here
     }
 
-    json.NewEncoder(w).Encode(image)
+    if err := json.NewEncoder(w).Encode(image); err != nil {
+        log.Printf("Failed to encode response: %v", err)
+        http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+    }
 }
+
+
 
 
 // DownloadImageHandler serves the saved image for download

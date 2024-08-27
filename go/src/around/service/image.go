@@ -12,25 +12,33 @@ import (
     
     "net/http"
     
-    "time"
-	"io/ioutil"
+   "errors"
+	"io"
+    "github.com/google/uuid"
 )
 
-// GenerateAIImage calls the OpenAI API to generate an image based on the given description
-func GenerateAIImage(description string, userId string) (string, error) {
-    // Call OpenAI API to generate image
-    // (This is a simplified version - make sure to use your actual API calling logic)
-    requestBody, _ := json.Marshal(map[string]string{
-        "description": description,
-    })
+func generateUniqueId() string {
+    return uuid.New().String()
+}
 
-    req, err := http.NewRequest("POST", "https://api.openai.com/v1/images/generate", ioutil.NopCloser(bytes.NewReader(requestBody)))
+// GenerateAIImage calls the OpenAI API to generate an image based on the given description
+func GenerateAIImage(description, userID string) (string, error) {
+    imageId := generateUniqueId()
+
+    requestBody, err := json.Marshal(map[string]string{
+        "prompt": description,
+    })
     if err != nil {
         return "", err
     }
 
+    req, err := http.NewRequest("POST", constants.OPENAI_API_URL, io.NopCloser(bytes.NewBuffer(requestBody)))
+    if err != nil {
+        return "", err
+    }
+
+    req.Header.Set("Authorization", "Bearer "+constants.OpenAIAPIKey)
     req.Header.Set("Content-Type", "application/json")
-    req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", constants.OpenAIAPIKey))
 
     client := &http.Client{}
     resp, err := client.Do(req)
@@ -39,26 +47,51 @@ func GenerateAIImage(description string, userId string) (string, error) {
     }
     defer resp.Body.Close()
 
-    var responseData map[string]interface{}
-    json.NewDecoder(resp.Body).Decode(&responseData)
+    fmt.Printf("OpenAI API response status: %s\n", resp.Status)
 
-    if resp.StatusCode != http.StatusOK {
-        return "", fmt.Errorf("failed to generate image: %v", responseData["error"])
+    body, err := io.ReadAll(resp.Body)
+    if err != nil {
+        return "", err
     }
 
-    // Assume the API returns a URL for the generated image
-    imageUrl := responseData["data"].(string)
+    fmt.Printf("OpenAI API response body: %s\n", string(body))
 
-    // Store in GCS
-    imageId := fmt.Sprintf("%d", time.Now().UnixNano())
+    if resp.StatusCode != http.StatusOK {
+        return "", errors.New("OpenAI API request failed with status: " + resp.Status)
+    }
+
+    var jsonResponse map[string]interface{}
+    if err := json.Unmarshal(body, &jsonResponse); err != nil {
+        return "", err
+    }
+
+    // Extract the image URL from the "data" array
+    data, ok := jsonResponse["data"].([]interface{})
+    if !ok || len(data) == 0 {
+        return "", errors.New("no image data found in OpenAI API response")
+    }
+
+    firstItem, ok := data[0].(map[string]interface{})
+    if !ok {
+        return "", errors.New("invalid image data format in OpenAI API response")
+    }
+
+    imageUrl, ok := firstItem["url"].(string)
+    if !ok {
+        return "", errors.New("image URL not found in OpenAI API response")
+    }
+
+    // Save image URL to GCS
     gcsUrl, err := backend.GCSBackend.SaveImageURLToGCS(imageUrl, imageId)
     if err != nil {
         return "", err
     }
 
-    // Return the GCS URL
     return gcsUrl, nil
 }
+
+
+
 
 func DownloadImage(imageUrl string) ([]byte, error) {
     client := &http.Client{}
@@ -68,5 +101,5 @@ func DownloadImage(imageUrl string) ([]byte, error) {
     }
     defer resp.Body.Close()
 
-    return ioutil.ReadAll(resp.Body)
+    return io.ReadAll(resp.Body)
 }
