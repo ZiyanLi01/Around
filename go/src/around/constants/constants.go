@@ -7,4 +7,5 @@ const (
 	ES_USERNAME = "liz"
 	ES_PASSWORD = "920210"
 	GCS_BUCKET = "around-liz"
+	OpenAIAPIKey = "your-openai-api-key-here"  // Replace with your actual API key
 )

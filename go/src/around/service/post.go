@@ -55,3 +55,11 @@ package service
         query.Must(elastic.NewTermQuery("user", user))
         return backend.ESBackend.DeleteFromES(query, constants.POST_INDEX)
     }
+
+    func CreatePost(post *model.Post) error {
+        // This assumes the image has already been uploaded to GCS
+        // and the `post.Url` contains the public URL of the image.
+    
+        // Save the post to ElasticSearch
+        return backend.ESBackend.SaveToES(post, constants.POST_INDEX, post.Id)
+    }

@@ -4,35 +4,47 @@ import (
 	"context"
 	"fmt" 
 	"io"
-	"around/constants"
-
+	"time"
 	"cloud.google.com/go/storage"
+	"net/http"
+	"log"
+	"around/constants"
 )
 
+/*
 var (
 	GCSBackend *GoogleCloudStorageBackend
 )
+
 
 type GoogleCloudStorageBackend struct {
 	client *storage.Client
 	bucket string
 }
+*/
+
+type GCSBackendStruct struct {
+    Client *storage.Client
+    Bucket string
+}
+var GCSBackend *GCSBackendStruct
 
 func InitGCSBackend() {
-	client, err := storage.NewClient(context.Background())
-	if err != nil {
-		panic(err) 
-	}
+    ctx := context.Background()
+    client, err := storage.NewClient(ctx)
+    if err != nil {
+        log.Fatalf("Failed to create GCS client: %v", err)
+    }
 
-	GCSBackend = &GoogleCloudStorageBackend{
-		client: client,
-		bucket: constants.GCS_BUCKET,
-	}
+    GCSBackend = &GCSBackendStruct{
+        Client: client,
+        Bucket: constants.GCS_BUCKET, // Replace with your actual bucket name
+    }
 }
 
-func (backend *GoogleCloudStorageBackend) SaveToGCS(r io.Reader, objectName string)(string, error) {
+func (backend *GCSBackendStruct) SaveToGCS(r io.Reader, objectName string)(string, error) {
 	ctx := context.Background()
-	object := backend.client.Bucket(backend.bucket).Object(objectName)
+	object := backend.Client.Bucket(backend.Bucket).Object(objectName)
 	wc := object.NewWriter(ctx)
 	if _, err := io.Copy(wc, r); err != nil {
 		return "", err
@@ -52,4 +64,30 @@ func (backend *GoogleCloudStorageBackend) SaveToGCS(r io.Reader, objectName stri
 
 	fmt.Printf("File is saved to GCS: %s\n", attrs.MediaLink)
 	return attrs.MediaLink, nil
+}
+
+func (gcs *GCSBackendStruct) SaveImageURLToGCS(imageUrl string, imageId string) (string, error) {
+    ctx := context.Background()
+    ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+    defer cancel()
+
+    // Get the image data from the URL
+    resp, err := http.Get(imageUrl)
+    if err != nil {
+        return "", err
+    }
+    defer resp.Body.Close()
+
+    bucket := gcs.Client.Bucket(gcs.Bucket)
+    obj := bucket.Object(imageId)
+
+    wc := obj.NewWriter(ctx)
+    if _, err := io.Copy(wc, resp.Body); err != nil {
+        return "", err
+    }
+    if err := wc.Close(); err != nil {
+        return "", err
+    }
+
+    return fmt.Sprintf("https://storage.googleapis.com/%s/%s", gcs.Bucket, imageId), nil
 }
