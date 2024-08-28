@@ -4,15 +4,11 @@ import (
     "encoding/json"
     "net/http"
     "around/service"
-    "around/model"
     "github.com/gorilla/mux"
     "log"
-    "github.com/google/uuid"
 )
 
-func generateUniqueId() string {
-    return uuid.New().String()
-}
+
 
 // GenerateImageHandler handles the request to generate an AI image
 func GenerateImageHandler(w http.ResponseWriter, r *http.Request) {
@@ -40,14 +36,16 @@ func GenerateImageHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    image := model.Image{
-        Id:          generateUniqueId(),
-        Url:         imageUrl,
-        Description: req.Description,
-        UserId:      userID,  // Consistent naming here
+    // Prepare the response with the structured format
+    imageResponse := struct {
+        ImageUrl string `json:"imageUrl"`
+    }{
+        ImageUrl: imageUrl, // Directly use the imageUrl returned from GenerateAIImage
     }
 
-    if err := json.NewEncoder(w).Encode(image); err != nil {
+    // Send the JSON response to the frontend
+    w.Header().Set("Content-Type", "application/json")
+    if err := json.NewEncoder(w).Encode(imageResponse); err != nil {
         log.Printf("Failed to encode response: %v", err)
         http.Error(w, "Failed to encode response", http.StatusInternalServerError)
     }

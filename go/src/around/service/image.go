@@ -86,8 +86,12 @@ func GenerateAIImage(description, userID string) (string, error) {
     if err != nil {
         return "", err
     }
+    fmt.Printf("gcsUrl: %s\n", gcsUrl)
+    fmt.Printf("imageUrl: %s\n", imageUrl)
+    return imageUrl, nil
 
-    return gcsUrl, nil
+    
+    
 }
 
 
