@@ -2,7 +2,7 @@
 This is a dynamic social networking platform I've passionately developed to enhance user interactions in a seamless and scalable manner. This project is designed to handle the challenges of high user activity, provide an enriched user experience with AI-generated content, and offer fast, accurate search capabilities. Whether you're posting, browsing, or connecting with others, Around is built to support your needs efficiently and securely.
 
 ## Project Demo
-
+https://github.com/user-attachments/assets/0555652b-80d4-4ad7-8dfd-b751ff97fa45
 
 ## Table of Contents
 - [Introduction](#introduction)
