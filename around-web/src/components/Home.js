@@ -30,7 +30,7 @@ function Home(props) {
     const fetchPost = (option) => {
         const { type, keyword } = option;
         let url = "";
-
+    
         if (type === SEARCH_KEY.all) {
             url = `${BASE_URL}/search`;
         } else if (type === SEARCH_KEY.user) {
@@ -38,7 +38,7 @@ function Home(props) {
         } else {
             url = `${BASE_URL}/search?keywords=${keyword}`;
         }
-
+    
         const opt = {
             method: "GET",
             url: url,
@@ -46,10 +46,11 @@ function Home(props) {
                 Authorization: `Bearer ${localStorage.getItem(TOKEN_KEY)}`
             }
         };
-
+    
         axios(opt)
             .then((res) => {
                 if (res.status === 200) {
+                    console.log("Fetched posts: ", res.data); // Log the fetched posts
                     setPost(res.data);
                 }
             })
@@ -58,11 +59,13 @@ function Home(props) {
                 console.log("fetch posts failed: ", err.message);
             });
     };
+    
 
     const renderPosts = (type) => {
         if (!posts || posts.length === 0) {
             return <div>No data!</div>;
         }
+    
         if (type === "image") {
             const imageArr = posts
                 .filter((item) => item.type === "image")
@@ -77,25 +80,31 @@ function Home(props) {
                         thumbnailHeight: 200
                     };
                 });
-
+    
             return <PhotoGallery images={imageArr} />;
         } else if (type === "video") {
             return (
-                <Row gutter={32}>
-                    {posts
-                        .filter((post) => post.type === "video")
-                        .map((post) => (
-                            <Col span={8} key={post.url}>
-                                <video src={post.url} controls={true} className="video-block" />
-                                <p>
-                                    {post.user}: {post.message}
-                                </p>
-                            </Col>
-                        ))}
-                </Row>
+                <div style={{ maxHeight: "900px" }}>
+                    <Row gutter={[1, 1]}>
+                        {posts
+                            .filter((post) => post.type === "video")
+                            .map((post) => (
+                                <Col span={24} key={post.id}>
+                                    <video 
+                                        src={post.url} 
+                                        controls={true} 
+                                        style={{ width: "100%" }} 
+                                    />
+                                    <p>{post.user}: {post.message}</p>
+                                </Col>
+                            ))}
+                    </Row>
+                </div>
             );
         }
     };
+    
+    
 
     const showPost = (type) => {
         setActiveTab(type);
