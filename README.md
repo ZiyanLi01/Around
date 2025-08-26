@@ -1,6 +1,6 @@
-# Around - Social Networking Platform
+# PandaPost - Social Networking Platform
 
-Around is a dynamic social networking platform designed to enhance user interactions through seamless content sharing, AI-powered features, and robust search capabilities. Built with modern technologies, Around provides a scalable and user-friendly experience for creating, sharing, and discovering content.
+PandaPost is a dynamic social networking platform designed to enhance user interactions through seamless content sharing, AI-powered features, and robust search capabilities. Built with modern technologies, Around provides a scalable and user-friendly experience for creating, sharing, and discovering content.
 
 ## Project Demo
 https://github.com/user-attachments/assets/0555652b-80d4-4ad7-8dfd-b751ff97fa45
@@ -18,7 +18,7 @@ https://github.com/user-attachments/assets/0555652b-80d4-4ad7-8dfd-b751ff97fa45
 
 ## Overview
 
-Around is a full-stack social networking application that combines modern web technologies with AI capabilities. The platform allows users to create posts with images and videos, generate AI-powered content, and discover posts through advanced search functionality. Built with scalability in mind, Around handles high user activity while maintaining performance and security.
+PandaPost is a full-stack social networking application that combines modern web technologies with AI capabilities. The platform allows users to create posts with images and videos, generate AI-powered content, and discover posts through advanced search functionality. Built with scalability in mind, Around handles high user activity while maintaining performance and security.
 
 ## Features
 
